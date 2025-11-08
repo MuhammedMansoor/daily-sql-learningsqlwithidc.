@@ -6,3 +6,4 @@ Daily Challenge : Question: List all unique hospital services available in the h
 Solution:
 use challenge;
 SELECT distinct(service) from staff;
+
