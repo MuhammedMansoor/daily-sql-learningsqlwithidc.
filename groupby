@@ -1,0 +1,24 @@
+Learnt Group BY:
+1. Count the number of patients by each service.
+  Sol: use challenge;
+SELECT Service,count(patient_id) as Numberofpatients from patients
+group by service;
+
+
+
+2. Calculate the average age of patients grouped by service.
+
+  Sol: Use challenge;
+SELECT Service, avg(age) as AVG_AGE from patients
+group by service;
+3. Find the total number of staff members per role.
+use challenge;
+SELECT Role,count(staff_id) as numbers from staff
+group by role;
+
+Challenge:
+For each hospital service, calculate the total number of patients admitted, total patients refused, and the admission rate (percentage of requests that were admitted). Order by admission rate descending.
+Sol:
+Use challenge;
+SELECT Service,sum(patients_admitted) AS Admitted,sum(patients_refused) as Refused,round((sum(patients_admitted)/sum(patients_request))*100,1) as Pctofrequestadmitted from services_weekly
+group by service;
