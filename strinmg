@@ -1,0 +1,26 @@
+String Functions:
+1. Convert all patient names to uppercase.
+2. Find the length of each staff member's name.
+3. Concatenate staff_id and staff_name with a hyphen separator.
+
+Sol:
+1, USE Challenge;
+SELECT upper(name) as Patient from patients;
+2, USE Challenge;
+SELECT name, length(name) as Len from patients;
+3, USE Challenge;
+SELECT concat_ws("-",staff_id,staff_name)  as IDNAME from staff;
+
+Challenge :Create a patient summary that shows patient_id, full name in uppercase, service in lowercase, age category (if age >= 65 then 'Senior', if age >= 18 then 'Adult', else 'Minor'), and name length. 
+Only show patients whose name length is greater than 10 characters.
+
+Sol:
+USE Challenge;
+SELECT patient_id,upper(name) as name,lower(service) as service,
+case
+when age>=65 then 'Senior'
+when age>=18 then 'Adult'
+else 'Minor'
+end
+as age_category
+from patients;
