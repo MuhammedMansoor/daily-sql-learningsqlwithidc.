@@ -1,0 +1,26 @@
+1. List all unique services in the patients table.
+2. Find all unique staff roles in the hospital.
+3. Get distinct months from the services_weekly table.
+
+Sol
+  1, use challenge;
+SELECT distinct(service) as Service from patients;
+
+2, use challenge;
+select distinct(role) as role from staff;
+
+3, use challenge;
+select distinct(month) as months from services_weekly;
+
+
+Find all unique combinations of service and event type from the services_weekly table where events are not null or none, along with the count of occurrences for each combination. Order by count descending.
+  Sol:
+  use challenge;
+
+SELECT service,
+       event AS event_type,
+       COUNT(*) AS occurrence_count
+FROM services_weekly
+WHERE event IS NOT NULL AND event <> 'none'
+GROUP BY service, event
+ORDER BY occurrence_count DESC;
