@@ -1,0 +1,89 @@
+Imported files
+
+q,List all unique pizza categories (DISTINCT).
+a,USE pizza_challenge;
+SELECT distinct(CATEGORY) FROM pizza_types;
+
+q,Display `pizza_type_id`, `name`, and ingredients, replacing NULL ingredients with `"Missing Data"`. Show first 5 rows.
+a,USE pizza_challenge;
+SELECT pizza_type_id,name,coalesce(ingredients,"Missing Data") as ingredients from pizza_types
+limit 5;
+
+q, Check for pizzas missing a price (IS NULL).
+a, USE pizza_challenge;
+SELECT * from pizzas where price is null;
+
+q, Orders placed on '2015-01-01' (SELECT + WHERE).
+
+a, USE pizza_challenge;
+SELECT order_id from orders where date='2015-01-01';
+
+q, List pizzas with price descending.
+a, USE pizza_challenge;
+SELECT pizza_id FROM pizzas
+order by price desc;
+
+q, Pizzas sold in sizes 'L' or 'XL'.
+a, USE pizza_challenge;
+SELECT pizza_id from pizzas where size in ("L","XL");
+
+
+q, Pizzas priced between $15.00 and $17.00.
+
+A, USE pizza_challenge;
+SELECT pizza_id,price from pizzas where price Between 15 AND 17;
+
+Q, Pizzas with "Chicken" in the name.
+a, USE pizza_challenge;
+SELECT *
+FROM pizza_types
+WHERE name LIKE '%chicken%';
+
+q, Orders on '2015-02-15' or placed after 8 PM.
+a, USE pizza_challenge;
+SELECT * FROM orders
+WHERE date='2015-02-15' or time>'20:00:00';
+
+
+q, Total quantity of pizzas sold (SUM).
+
+a, USE pizza_challenge; SELECT SUM(QUANTITY) AS Pizza_sold from order_details;
+
+q, Average pizza price (AVG).
+a, USE pizza_challenge;SELECT avg(price) from pizzas as AVG_PRICE;
+
+
+Q, Total order value per order (JOIN, SUM, GROUP BY).
+A, USE pizza_challenge;
+SELECT od.order_id,sum(p.price) as prices from order_details od left join pizzas p using(pizza_id) group by od.order_id;
+
+q, Total quantity sold per pizza category (JOIN, GROUP BY).
+a, USE pizza_challenge;SELECT pt.category,sum(od.quantity) as Quantity_Sold from order_details od left join pizzas p using(pizza_id) left join pizza_types pt using(pizza_type_id) group by pt.category;
+
+q, Categories with more than 5,000 pizzas sold (HAVING).
+a, USE pizza_challenge;
+SELECT pt.category,sum(od.quantity) as Quantity_Sold from
+order_details od left join pizzas p using(pizza_id)
+left join pizza_types pt using(pizza_type_id)
+group by pt.category
+having Quantity_Sold>5000;
+
+
+q, Pizzas never ordered (LEFT/RIGHT JOIN).
+
+a, USE pizza_challenge;SELECT p.pizza_id,coalesce(sum(od.quantity)) as qty from pizzas p left join order_details od using(pizza_id) where od.quantity is null group by P.pizza_id;
+
+q, Price differences between different sizes of the same pizza (SELF JOIN).
+
+a, USE pizza_challenge; SELECT t1.pizza_type_id,coalesce(round(max(t1.price)-min(t2.price),1),0) as price_diffrence from pizzas t1 left join pizzas t2 on t1.pizza_type_id=t2.pizza_type_id and t1.size!=t2.size
+ group by t1.pizza_type_id;
+
+
+
+
+
+
+
+
+
+
