@@ -1,0 +1,136 @@
+1. Create a CTE to calculate service statistics, then query from it.
+2. Use multiple CTEs to break down a complex query into logical steps.
+3. Build a CTE for staff utilization and join it with patient data.
+
+SOL
+1, USE Challenge;
+WITH
+STATS as ( 
+SELECT service, week, patients_Admitted as admitted,
+sum(patients_admitted) over (partition by service order by week asc) as cumulative_admission,
+round(avg(patient_satisfaction) over (partition by service order by week asc rows between 2 preceding and current row),1) as 2WMA,
+round(patients_admitted-avg(patients_admitted) over (partition by service),1) as diff
+from services_weekly)
+
+select*from stats
+where service="ICU";
+
+2, WITH service_stats AS (
+    SELECT
+        service,
+        COUNT(*) AS patient_count,
+        AVG(satisfaction) AS avg_satisfaction
+    FROM patients
+    GROUP BY service
+)
+SELECT *FROM service_stats
+WHERE avg_satisfaction > 75 ORDER BY patient_count DESC;
+-- Multiple CTEs for complex analysis 
+WITH
+patient_metrics AS (
+    SELECT
+        service,
+        COUNT(*) AS total_patients,
+        AVG(age) AS avg_age,
+        AVG(satisfaction) AS avg_satisfaction
+    FROM patients
+    GROUP BY service
+),
+staff_metrics AS (
+    SELECT
+        service,
+        COUNT(*) AS total_staff
+    FROM staff
+    GROUP BY service
+),
+weekly_metrics AS (
+    SELECT
+        service,
+        SUM(patients_admitted) AS total_admitted,
+        SUM(patients_refused) AS total_refused
+    FROM services_weekly
+    GROUP BY service
+)
+SELECT
+    pm.service,
+    pm.total_patients,
+    pm.avg_age,
+    pm.avg_satisfaction,
+    sm.total_staff,
+    wm.total_admitted,
+    wm.total_refused,
+    ROUND(100.0 * wm.total_admitted /
+          (wm.total_admitted + wm.total_refused), 2) AS admission_rate
+FROM patient_metrics pm
+LEFT JOIN staff_metrics sm ON pm.service = sm.service
+LEFT JOIN weekly_metrics wm ON pm.service = wm.service
+ORDER BY pm.avg_satisfaction DESC;
+-- CTE referencing another CTE
+WITH
+all_admissions AS (
+    SELECT
+        service,
+        SUM(patients_admitted) AS total
+    FROM services_weekly
+    GROUP BY service
+),
+high_performing_services AS (
+    SELECT service
+    FROM all_admissions
+    WHERE total > (SELECT AVG(total) FROM all_admissions)
+)
+SELECT *FROM patients
+WHERE service IN (SELECT service FROM high_performing_services);
+
+Create a comprehensive hospital performance dashboard using CTEs. 
+Calculate: 1) Service-level metrics (total admissions, refusals, avg satisfaction), 
+          2) Staff metrics per service (total staff, avg weeks present), 
+          3) Patient demographics per service (avg age, count). T
+            Then combine all three CTEs to create a final report showing service name, all calculated metrics, and an overall performance score (weighted average of admission rate and satisfaction).
+            Order by performance score descending.
+
+  USE challenge;
+WITH SERVICE AS (
+					SELECT service, 
+                    sum(patients_admitted) as total_admission,
+                    sum(patients_refused) as total_refused, 
+                    avg(patient_satisfaction) as avg_satisfaction 
+                    from services_weekly
+                    group by service
+),
+         
+STAFFS as (
+				SELECT s.service,count(s.staff_id) as staff_count,avg(ss.present) as avg_weeks_present from staff s
+                left join staff_schedule ss using(staff_id)
+                Group by s.service),
+
+DEMOGRAPHICS AS (
+					SELECT service,avg(age) as avg_age, count(patient_id) as Count_of_patients from patients
+                    group by service)
+                    
+SELECT s.service,s.total_admission,s.total_refused,s.avg_satisfaction,
+	ss.staff_count,ss.avg_weeks_present,
+    d.avg_age,d.Count_of_patients,
+    round(((s.total_admission/(s.total_admission+s.total_refused))*0.6)+(s.avg_satisfaction*0.4),2) as performance_score
+    from service s left join staffs ss using(service) left join demographics d using(service)
+  
+    order by performance_score desc;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
