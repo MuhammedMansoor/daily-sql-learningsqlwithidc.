@@ -1,0 +1,37 @@
+1. Show each patient with their service's average satisfaction as an additional column.
+2. Create a derived table of service statistics and query from it.
+3. Display staff with their service's total patient count as a calculated field.
+
+SOl
+1, USE challenge;
+SELECT p.patient_id,p.service,p.satisfaction,
+(select avg(p2.satisfaction) from patients p2 where p2.service=p.service) as avg_satisfaction from patients p;
+
+2, USE Challenge;
+SELECT p.service,p.patients_admitted,p.avg_satisfaction
+from
+(SELECT service, count(patient_id) as patients_admitted,avg(satisfaction) as avg_satisfaction from patients
+group by service) as p;
+
+3, USE Challenge;
+SELECT s.staff_id,s.service,
+(SELECT count(p.patient_id) as patient_count from patients p
+where s.service=p.service) as patients_count from staff s;
+
+Challenge:
+Create a report showing each service with: service name, total patients admitted, the difference between their total admissions and the average admissions across all services, 
+and a rank indicator ('Above Average', 'Average', 'Below Average').
+Order by total patients admitted descending.
+
+USE Challenge;
+SELECT service,admitted,admitted-avg(admitted) over () as diff,
+CASE
+WHEN admitted>avg(admitted) over () then "Above Avg"
+WHEN admitted=avg(admitted) over () then "=Avg"
+ELSE "Below Avg"
+end as RANKING
+from(
+SELECT sw.service,sum(sw.patients_admitted) as admitted
+from services_weekly sw
+group by sw.service) t
+Order by admitted desc;
