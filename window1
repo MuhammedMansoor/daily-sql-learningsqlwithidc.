@@ -1,0 +1,20 @@
+1. Rank patients by satisfaction score within each service.
+2. Assign row numbers to staff ordered by their name.
+3. Rank services by total patients admitted.
+
+sol
+1, USE challenge;
+SELECT patient_id,dense_rank() over (partition by service order by satisfaction asc) as sati from patients;
+
+2, USE challenge;
+SELECT staff_name, row_number() over (order by staff_name desc) from staff;
+
+3, USE challenge;
+SELECT service,sum(patients_admitted) as admitted,dense_rank() over (order by sum(patients_admitted) asc) as ranks from services_weekly
+group by service;
+
+For each service, rank the weeks by patient satisfaction score (highest first). Show service, week, patient_satisfaction, patients_admitted, and the rank. Include only the top 3 weeks per service.USE Challenge;
+select* from(
+SELECT service,week,patient_satisfaction,patients_Admitted as admitted, dense_rank() over(partition by service order by patient_satisfaction desc) as ranks from services_weekly) t
+where ranks<=3;
+
